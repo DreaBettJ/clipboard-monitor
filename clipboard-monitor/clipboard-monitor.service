@@ -1,0 +1,14 @@
+[Unit]
+Description=Clipboard Monitor Service
+After=network.target
+
+[Service]
+Type=simple
+User=lijiang
+WorkingDirectory=/home/lijiang/code/script/clipboard-monitor
+ExecStart=/bin/bash -c '/usr/bin/python3 /home/lijiang/code/script/clipboard-monitor/clipboard_monitor.py & /usr/bin/python3 /home/lijiang/code/script/clipboard-monitor/web_manager.py'
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
