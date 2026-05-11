@@ -10,6 +10,7 @@
 import os
 import re
 import json
+import shutil
 import subprocess
 import time
 import threading
@@ -138,21 +139,20 @@ def process_curl(text: str, rules: list, use_regex: bool = False) -> str:
                 # 普通字符串模式
                 # 检查 pattern 是否以 https?:// 开头
                 if pattern.startswith("https://") or pattern.startswith("http://"):
-                    # 完整 URL 模式，替换后不带 protocol
+                    # 完整 URL 模式，保留 protocol
                     protocol = "https://" if pattern.startswith("https://") else "http://"
                     domain_path = pattern[len(protocol):]
                     escaped_pattern = re.escape(domain_path)
-                    # 替换 URL（去掉 protocol）
                     # (curl\s+['\"]) 是 group 1, (/[^'\" ]*)? 是 group 2, (['\"]) 是 group 3
                     result = re.sub(
                         rf"(curl\s+['\"]){protocol}{escaped_pattern}(/[^'\" ]*)?(['\"])",
-                        rf"\1{replace}\2\3",
+                        rf"\1{protocol}{replace}\2\3",
                         result, flags=re.IGNORECASE
                     )
-                    # 去掉 protocol 的替换
+                    # 替换 URL，保留 protocol
                     result = re.sub(
                         rf"{protocol}{escaped_pattern}(/[^'\" ]*)?",
-                        rf"{replace}\1",
+                        rf"{protocol}{replace}\1",
                         result, flags=re.IGNORECASE
                     )
                 else:
@@ -203,9 +203,38 @@ def log(message: str):
     print(log_line.strip())
 
 
+def check_dependencies():
+    required = {
+        "xclip": "sudo apt install xclip",
+        "xsel":  "sudo apt install xsel",
+    }
+    missing = []
+    found_any = False
+
+    for tool, install_cmd in required.items():
+        if shutil.which(tool):
+            found_any = True
+        else:
+            missing.append((tool, install_cmd))
+
+    # xclip 和 xsel 至少需要一个
+    if not found_any:
+        print("❌ 错误: 缺少剪贴板工具")
+        print(f"   请安装以下任一工具:")
+        for tool, cmd in missing:
+            print(f"   - {cmd}")
+        return False
+
+    return True
+
+
 def monitor_clipboard():
     """监控剪切板"""
     global last_clipboard, processed_requests
+    
+    if not check_dependencies():
+        print("依赖检查未通过，退出。")
+        return
     
     config = load_config()
     

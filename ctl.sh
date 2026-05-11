@@ -11,11 +11,15 @@ case "$action" in
     start)
         echo "🚀 启动剪贴板监控..."
         
-        # 激活虚拟环境
-        # 使用系统 python
+        # 依赖检查
+        if ! command -v xclip >/dev/null 2>&1 && ! command -v xsel >/dev/null 2>&1; then
+            echo "❌ 错误: 缺少剪贴板工具 (xclip 或 xsel)"
+            echo "   请运行: sudo apt install xclip"
+            exit 1
+        fi
         
         # 后台启动监控
-        nohup python3 "$SCRIPT_DIR/clipboard_monitor.py" > "$LOG_DIR/clipboard-monitor.log" 2>&1 &
+        nohup python3 "$SCRIPT_DIR/clipboard_monitor.py" --daemon > "$LOG_DIR/clipboard-monitor.log" 2>&1 &
         echo "✅ 监控已启动 (PID: $!)"
         
         # 后台启动 Web 界面

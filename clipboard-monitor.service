@@ -5,10 +5,13 @@ After=network.target
 [Service]
 Type=simple
 User=lijiang
-WorkingDirectory=/home/lijiang/code/script/clipboard-monitor
-ExecStart=/bin/bash -c '/usr/bin/python3 /home/lijiang/code/script/clipboard-monitor/clipboard_monitor.py & /usr/bin/python3 /home/lijiang/code/script/clipboard-monitor/web_manager.py'
+WorkingDirectory=/home/lijiang/code/clipboard-monitor
+Environment=DISPLAY=:0.0
+Environment=XAUTHORITY=/home/lijiang/.Xauthority
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ExecStart=/usr/bin/bash -c '/usr/bin/python3 /home/lijiang/code/clipboard-monitor/clipboard_monitor.py --daemon & /usr/bin/python3 /home/lijiang/code/clipboard-monitor/web_manager.py & wait'
 Restart=always
 RestartSec=10
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

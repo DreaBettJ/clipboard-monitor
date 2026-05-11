@@ -98,7 +98,7 @@ HTML = """<!DOCTYPE html>
             </div>
             <div id="rulesList"></div>
             <div class="add-form">
-                <input type="text" id="newPattern" placeholder="原域名或正则 (如: dev\\.huilianyi\\.com)">
+                <input type="text" id="newPattern" placeholder="原域名 (如: https://dev.huilianyi.com)">
                 <input type="text" id="newReplace" placeholder="替换为 (如: {{local-dev-host}})">
                 <button onclick="addRule()">添加规则</button>
             </div>
