@@ -25,9 +25,9 @@ LOG_FILE = CONFIG_DIR / "clipboard.log"
 # 默认配置
 DEFAULT_CONFIG = {
     "rules": [
-        {"pattern": "dev.huilianyi.com", "replace": "{{local-dev-host}}"},
-        {"pattern": "uat.huilianyi.com", "replace": "{{local-uat-host}}"},
-        {"pattern": "pro.huilianyi.com", "replace": "{{local-pro-host}}"},
+        {"pattern": "https://dev.huilianyi.com", "replace": "{{local-dev-host}}"},
+        {"pattern": "https://uat.huilianyi.com", "replace": "{{local-uat-host}}"},
+        {"pattern": "https://pro.huilianyi.com", "replace": "{{local-pro-host}}"},
     ],
     "use_regex": False,
     "match_prefix": "curl",
@@ -139,20 +139,20 @@ def process_curl(text: str, rules: list, use_regex: bool = False) -> str:
                 # 普通字符串模式
                 # 检查 pattern 是否以 https?:// 开头
                 if pattern.startswith("https://") or pattern.startswith("http://"):
-                    # 完整 URL 模式，保留 protocol
+                    # 完整 URL 模式，替换后不带 protocol（变量已包含完整 URL 含义）
                     protocol = "https://" if pattern.startswith("https://") else "http://"
                     domain_path = pattern[len(protocol):]
                     escaped_pattern = re.escape(domain_path)
                     # (curl\s+['\"]) 是 group 1, (/[^'\" ]*)? 是 group 2, (['\"]) 是 group 3
                     result = re.sub(
                         rf"(curl\s+['\"]){protocol}{escaped_pattern}(/[^'\" ]*)?(['\"])",
-                        rf"\1{protocol}{replace}\2\3",
+                        rf"\1{replace}\2\3",
                         result, flags=re.IGNORECASE
                     )
-                    # 替换 URL，保留 protocol
+                    # 去掉 protocol 的替换
                     result = re.sub(
                         rf"{protocol}{escaped_pattern}(/[^'\" ]*)?",
-                        rf"{protocol}{replace}\1",
+                        rf"{replace}\1",
                         result, flags=re.IGNORECASE
                     )
                 else:
